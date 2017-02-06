@@ -64,7 +64,7 @@ class ProcessStats(Process):
             rolling_frame_count = 0
             rolling_reward = 0
             results_q = queueQueue(maxsize=Config.STAT_ROLLING_MEAN_WINDOW)
-            
+
             self.start_time = time.time()
             first_time = datetime.now()
             while True:

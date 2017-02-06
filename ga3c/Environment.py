@@ -33,13 +33,15 @@ else:
 import numpy as np
 import scipy.misc as misc
 
+from gym.envs.atari.atari_env import AtariEnv
+
 from Config import Config
-from GameManager import GameManager
+from EnvWrapper import EnvWrapper
 
 
 class Environment:
     def __init__(self):
-        self.game = GameManager(Config.ATARI_GAME, display=Config.PLAY_MODE)
+        self.env_wrapper = EnvWrapper(Config.ENV_ID, Config.CLIENT_ID, Config.REMOTES, display=Config.PLAY_MODE)
         self.nb_frames = Config.STACKED_FRAMES
         self.frame_q = Queue(maxsize=self.nb_frames)
         self.previous_state = None
@@ -54,16 +56,22 @@ class Environment:
 
     @staticmethod
     def _preprocess(image):
-        image = Environment._rgb2gray(image)
-        image = misc.imresize(image, [Config.IMAGE_HEIGHT, Config.IMAGE_WIDTH], 'bilinear')
-        image = image.astype(np.float32) / 128.0 - 1.0
+        if image.shape[2] == 3:
+            image = Environment._rgb2gray(image)
+            image = misc.imresize(image, [Config.IMAGE_HEIGHT, Config.IMAGE_WIDTH], 'bilinear')
+            image = image.astype(np.float32) / 128.0 - 1.0
         return image
 
     def _get_current_state(self):
         if not self.frame_q.full():
             return None  # frame queue is not full yet.
         x_ = np.array(self.frame_q.queue)
-        x_ = np.transpose(x_, [1, 2, 0])  # move channels
+        # universe-starter agent stack 4 frame to form a 4-dim array,
+        # the first dim is batch
+        if len(x_.shape) == 4:
+            x_ = np.transpose(x_, [0, 2, 3, 1])  # move channels
+        else:
+            x_ = np.transpose(x_, [1, 2, 0])  # move channels
         return x_
 
     def _update_frame_q(self, frame):
@@ -73,16 +81,30 @@ class Environment:
         self.frame_q.put(image)
 
     def get_num_actions(self):
-        return len(self.game.env._action_set)
+        ok = False
+        env = self.env_wrapper.env
+        while not ok:
+            try:
+                actions = env._actions
+                ok = True
+            except:
+                try:
+                    env = env.env
+                except:
+                    break
+        if not ok:
+            if isinstance(env, AtariEnv):
+                actions = env._action_set
+        return len(actions)
 
     def reset(self):
         self.total_reward = 0
         self.frame_q.queue.clear()
-        self._update_frame_q(self.game.reset())
+        self._update_frame_q(self.env_wrapper.reset())
         self.previous_state = self.current_state = None
 
     def step(self, action):
-        observation, reward, done, _ = self.game.step(action)
+        observation, reward, done, _ = self.env_wrapper.step(action)
 
         self.total_reward += reward
         self._update_frame_q(observation)

@@ -23,16 +23,16 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from Ga3cEnvs import create_env
 
-import gym
 
-
-class GameManager:
-    def __init__(self, game_name, display):
-        self.game_name = game_name
+class EnvWrapper:
+    def __init__(self, env_id, client_id, remotes, display, **kwargs):
+        self.env_id = env_id
+        self.client_id = client_id
+        self.remotes = remotes
         self.display = display
-
-        self.env = gym.make(game_name)
+        self.env = create_env(env_id, client_id=client_id, remotes=remotes)
         self.reset()
 
     def reset(self):

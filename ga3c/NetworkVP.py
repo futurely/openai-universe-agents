@@ -63,7 +63,7 @@ class NetworkVP:
                 if Config.LOAD_CHECKPOINT or Config.SAVE_MODELS:
                     vars = tf.global_variables()
                     self.saver = tf.train.Saver({var.name: var for var in vars}, max_to_keep=0)
-                
+
 
     def _create_graph(self):
         self.x = tf.placeholder(
@@ -108,11 +108,11 @@ class NetworkVP:
             self.cost_p_2 = -1 * self.var_beta * \
                         tf.reduce_sum(tf.log(tf.maximum(self.softmax_p, self.log_epsilon)) *
                                       self.softmax_p, reduction_indices=1)
-        
+
         self.cost_p_1_agg = tf.reduce_sum(self.cost_p_1, reduction_indices=0)
         self.cost_p_2_agg = tf.reduce_sum(self.cost_p_2, reduction_indices=0)
         self.cost_p = -(self.cost_p_1_agg + self.cost_p_2_agg)
-        
+
         if Config.DUAL_RMSPROP:
             self.opt_p = tf.train.RMSPropOptimizer(
                 learning_rate=self.var_learning_rate,
@@ -136,10 +136,10 @@ class NetworkVP:
         if Config.USE_GRAD_CLIP:
             if Config.DUAL_RMSPROP:
                 self.opt_grad_v = self.opt_v.compute_gradients(self.cost_v)
-                self.opt_grad_v_clipped = [(tf.clip_by_norm(g, Config.GRAD_CLIP_NORM),v) 
+                self.opt_grad_v_clipped = [(tf.clip_by_norm(g, Config.GRAD_CLIP_NORM),v)
                                             for g,v in self.opt_grad_v if not g is None]
                 self.train_op_v = self.opt_v.apply_gradients(self.opt_grad_v_clipped)
-            
+
                 self.opt_grad_p = self.opt_p.compute_gradients(self.cost_p)
                 self.opt_grad_p_clipped = [(tf.clip_by_norm(g, Config.GRAD_CLIP_NORM),v)
                                             for g,v in self.opt_grad_p if not g is None]
@@ -228,10 +228,10 @@ class NetworkVP:
     def predict_p(self, x):
         prediction = self.sess.run(self.softmax_p, feed_dict={self.x: x})
         return prediction
-    
+
     def predict_p_and_v(self, x):
         return self.sess.run([self.softmax_p, self.logits_v], feed_dict={self.x: x})
-    
+
     def train(self, x, y_r, a, trainer_id):
         feed_dict = self.__get_base_feed_dict()
         feed_dict.update({self.x: x, self.y_r: y_r, self.action_index: a})
@@ -245,7 +245,7 @@ class NetworkVP:
 
     def _checkpoint_filename(self, episode):
         return 'checkpoints/%s_%08d' % (self.model_name, episode)
-    
+
     def _get_episode_from_filename(self, filename):
         # TODO: hacky way of getting the episode. ideally episode should be stored as a TF variable
         return int(re.split('/|_|\.', filename)[2])
@@ -259,7 +259,7 @@ class NetworkVP:
             filename = self._checkpoint_filename(Config.LOAD_EPISODE)
         self.saver.restore(self.sess, filename)
         return self._get_episode_from_filename(filename)
-       
+
     def get_variables_names(self):
         return [var.name for var in self.graph.get_collection('trainable_variables')]
 
