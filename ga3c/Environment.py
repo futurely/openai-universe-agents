@@ -81,21 +81,7 @@ class Environment:
         self.frame_q.put(image)
 
     def get_num_actions(self):
-        ok = False
-        env = self.env_wrapper.env
-        while not ok:
-            try:
-                actions = env._actions
-                ok = True
-            except:
-                try:
-                    env = env.env
-                except:
-                    break
-        if not ok:
-            if isinstance(env, AtariEnv):
-                actions = env._action_set
-        return len(actions)
+        return self.env_wrapper.env.action_space.n
 
     def reset(self):
         self.total_reward = 0
