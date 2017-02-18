@@ -177,7 +177,6 @@ runner appends the policy to the queue.
 
 
 class A3C(object):
-
   def __init__(self, env, task, visualise):
     """
 An implementation of the A3C algorithm that is reasonably well-tuned for the VNC environments.

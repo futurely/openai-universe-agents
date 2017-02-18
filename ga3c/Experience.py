@@ -24,10 +24,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 class Experience:
-    def __init__(self, state, action, prediction, reward, done):
-        self.state = state
-        self.action = action
-        self.prediction = prediction
-        self.reward = reward
-        self.done = done
+  def __init__(self, state, action, prediction, reward, done):
+    self.state = state
+    self.action = action
+    self.prediction = prediction
+    self.reward = reward
+    self.done = done

@@ -25,10 +25,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-if sys.version_info >= (3,0):
-    from queue import Queue
+if sys.version_info >= (3, 0):
+  from queue import Queue
 else:
-    from Queue import Queue
+  from Queue import Queue
 
 import numpy as np
 import scipy.misc as misc
@@ -40,61 +40,63 @@ from EnvWrapper import EnvWrapper
 
 
 class Environment:
-    def __init__(self):
-        self.env_wrapper = EnvWrapper(Config.ENV_ID, Config.CLIENT_ID, Config.REMOTES, render=Config.RENDER)
-        self.nb_frames = Config.STACKED_FRAMES
-        self.frame_q = Queue(maxsize=self.nb_frames)
-        self.previous_state = None
-        self.current_state = None
-        self.total_reward = 0
+  def __init__(self):
+    self.env_wrapper = EnvWrapper(
+        Config.ENV_ID, Config.CLIENT_ID, Config.REMOTES, render=Config.RENDER)
+    self.nb_frames = Config.STACKED_FRAMES
+    self.frame_q = Queue(maxsize=self.nb_frames)
+    self.previous_state = None
+    self.current_state = None
+    self.total_reward = 0
 
-        self.reset()
+    self.reset()
 
-    @staticmethod
-    def _rgb2gray(rgb):
-        return np.dot(rgb[..., :3], [0.299, 0.587, 0.114])
+  @staticmethod
+  def _rgb2gray(rgb):
+    return np.dot(rgb[..., :3], [0.299, 0.587, 0.114])
 
-    @staticmethod
-    def _preprocess(image):
-        if image.shape[2] == 3:
-            image = Environment._rgb2gray(image)
-            image = misc.imresize(image, [Config.IMAGE_HEIGHT, Config.IMAGE_WIDTH], 'bilinear')
-            image = image.astype(np.float32) / 128.0 - 1.0
-        return image
+  @staticmethod
+  def _preprocess(image):
+    if image.shape[2] == 3:
+      image = Environment._rgb2gray(image)
+      image = misc.imresize(image, [Config.IMAGE_HEIGHT, Config.IMAGE_WIDTH],
+                            'bilinear')
+      image = image.astype(np.float32) / 128.0 - 1.0
+    return image
 
-    def _get_current_state(self):
-        if not self.frame_q.full():
-            return None  # frame queue is not full yet.
-        x_ = np.array(self.frame_q.queue)
-        # universe-starter agent stack 4 frame to form a 4-dim array,
-        # the first dim is batch
-        if len(x_.shape) == 4:
-            x_ = np.transpose(x_, [0, 2, 3, 1])  # move channels
-        else:
-            x_ = np.transpose(x_, [1, 2, 0])  # move channels
-        return x_
+  def _get_current_state(self):
+    if not self.frame_q.full():
+      return None  # frame queue is not full yet.
+    x_ = np.array(self.frame_q.queue)
+    # universe-starter agent stack 4 frame to form a 4-dim array,
+    # the first dim is batch
+    if len(x_.shape) == 4:
+      x_ = np.transpose(x_, [0, 2, 3, 1])  # move channels
+    else:
+      x_ = np.transpose(x_, [1, 2, 0])  # move channels
+    return x_
 
-    def _update_frame_q(self, frame):
-        if self.frame_q.full():
-            self.frame_q.get()
-        image = Environment._preprocess(frame)
-        self.frame_q.put(image)
+  def _update_frame_q(self, frame):
+    if self.frame_q.full():
+      self.frame_q.get()
+    image = Environment._preprocess(frame)
+    self.frame_q.put(image)
 
-    def get_num_actions(self):
-        return self.env_wrapper.env.action_space.n
+  def get_num_actions(self):
+    return self.env_wrapper.env.action_space.n
 
-    def reset(self):
-        self.total_reward = 0
-        self.frame_q.queue.clear()
-        self._update_frame_q(self.env_wrapper.reset())
-        self.previous_state = self.current_state = None
+  def reset(self):
+    self.total_reward = 0
+    self.frame_q.queue.clear()
+    self._update_frame_q(self.env_wrapper.reset())
+    self.previous_state = self.current_state = None
 
-    def step(self, action):
-        observation, reward, done, _ = self.env_wrapper.step(action)
+  def step(self, action):
+    observation, reward, done, _ = self.env_wrapper.step(action)
 
-        self.total_reward += reward
-        self._update_frame_q(observation)
+    self.total_reward += reward
+    self._update_frame_q(observation)
 
-        self.previous_state = self.current_state
-        self.current_state = self._get_current_state()
-        return reward, done
+    self.previous_state = self.current_state
+    self.current_state = self._get_current_state()
+    return reward, done

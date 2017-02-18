@@ -20,7 +20,11 @@ parser.add_argument(
     default="PongDeterministic-v3",
     help="Environment id")
 parser.add_argument(
-    '-l', '--log-dir', type=str, default="/tmp/pong", help="Log directory path")
+    '-l',
+    '--log-dir',
+    type=str,
+    default="/tmp/pong",
+    help="Log directory path")
 parser.add_argument(
     '-n',
     '--dry-run',
@@ -66,8 +70,8 @@ def create_commands(session,
                     visualise=False):
   # for launching the TF workers and for launching tensorboard
   base_cmd = [
-      'CUDA_VISIBLE_DEVICES=', sys.executable, 'worker.py', '--log-dir', logdir,
-      '--env-id', env_id, '--num-workers', str(num_workers)
+      'CUDA_VISIBLE_DEVICES=', sys.executable, 'worker.py', '--log-dir',
+      logdir, '--env-id', env_id, '--num-workers', str(num_workers)
   ]
 
   if visualise:
@@ -85,10 +89,9 @@ def create_commands(session,
   ]
   for i in range(num_workers):
     cmds_map += [
-        new_cmd(
-            session, "w-%d" % i, base_cmd +
-            ["--job-name", "worker", "--task", str(i), "--remotes", remotes[i]],
-            mode, logdir, shell)
+        new_cmd(session, "w-%d" % i, base_cmd + [
+            "--job-name", "worker", "--task", str(i), "--remotes", remotes[i]
+        ], mode, logdir, shell)
     ]
 
   cmds_map += [
@@ -111,7 +114,9 @@ def create_commands(session,
     cmds += ["echo '#!/bin/sh' >{}/kill.sh".format(logdir)]
     notes += ["Run `source {}/kill.sh` to kill the job".format(logdir)]
   if mode == 'tmux':
-    notes += ["Use `tmux attach -t {}` to watch process output".format(session)]
+    notes += [
+        "Use `tmux attach -t {}` to watch process output".format(session)
+    ]
     notes += ["Use `tmux kill-session -t {}` to kill the job".format(session)]
   else:
     notes += ["Use `tail -f {}/*.out` to watch process output".format(logdir)]

@@ -27,23 +27,23 @@ from Ga3cEnvs import create_env
 
 
 class EnvWrapper:
-    def __init__(self, env_id, client_id, remotes, render, **kwargs):
-        self.env_id = env_id
-        self.client_id = client_id
-        self.remotes = remotes
-        self.render = render
-        self.env = create_env(env_id, client_id=client_id, remotes=remotes)
-        self.reset()
+  def __init__(self, env_id, client_id, remotes, render, **kwargs):
+    self.env_id = env_id
+    self.client_id = client_id
+    self.remotes = remotes
+    self.render = render
+    self.env = create_env(env_id, client_id=client_id, remotes=remotes)
+    self.reset()
 
-    def reset(self):
-        observation = self.env.reset()
-        return observation
+  def reset(self):
+    observation = self.env.reset()
+    return observation
 
-    def step(self, action):
-        self.render()
-        observation, reward, done, info = self.env.step(action)
-        return observation, reward, done, info
+  def step(self, action):
+    self.render()
+    observation, reward, done, info = self.env.step(action)
+    return observation, reward, done, info
 
-    def render(self):
-        if self.render:
-            self.env.render()
+  def render(self):
+    if self.render:
+      self.env.render()

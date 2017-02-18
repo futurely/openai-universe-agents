@@ -97,7 +97,6 @@ def DiagnosticsInfo(env, *args, **kwargs):
 
 
 class DiagnosticsInfoI(vectorized.Filter):
-
   def __init__(self, log_interval=503):
     super(DiagnosticsInfoI, self).__init__()
 
@@ -157,7 +156,8 @@ class DiagnosticsInfoI(vectorized.Filter):
 
       if info.get("stats.vnc.updates.n") is not None:
         to_log["diagnostics/vnc_updates_n"] = info["stats.vnc.updates.n"]
-        to_log["diagnostics/vnc_updates_n_ps"] = self._num_vnc_updates / elapsed
+        to_log[
+            "diagnostics/vnc_updates_n_ps"] = self._num_vnc_updates / elapsed
         self._num_vnc_updates = 0
       if info.get("stats.vnc.updates.bytes") is not None:
         to_log["diagnostics/vnc_updates_bytes"] = info[
@@ -207,7 +207,6 @@ def _process_frame42(frame):
 
 
 class AtariRescale42x42(vectorized.ObservationWrapper):
-
   def __init__(self, env=None):
     super(AtariRescale42x42, self).__init__(env)
     self.observation_space = Box(0.0, 1.0, [42, 42, 1])
@@ -217,7 +216,6 @@ class AtariRescale42x42(vectorized.ObservationWrapper):
 
 
 class FixedKeyState(object):
-
   def __init__(self, keys):
     self._keys = [keycode(key) for key in keys]
     self._down_keysyms = set()
@@ -295,8 +293,8 @@ class CropScreen(vectorized.ObservationWrapper):
 
   def _observation(self, observation_n):
     return [
-        ob[self.top:self.top + self.height, self.left:self.left + self.width, :]
-        if ob is not None else None for ob in observation_n
+        ob[self.top:self.top + self.height, self.left:self.left +
+           self.width, :] if ob is not None else None for ob in observation_n
     ]
 
 
@@ -309,7 +307,6 @@ def _process_frame_flash(frame):
 
 
 class FlashRescale(vectorized.ObservationWrapper):
-
   def __init__(self, env=None):
     super(FlashRescale, self).__init__(env)
     self.observation_space = Box(0.0, 1.0, [128, 200, 1])
