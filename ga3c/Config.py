@@ -52,6 +52,8 @@ class Config:
     LOAD_CHECKPOINT = False
     # If 0, the latest checkpoint is loaded
     LOAD_EPISODE = 0
+    # Render the GUI
+    RENDER = 1
 
     #########################################################################
     # Number of agents, predictors, trainers and other system settings

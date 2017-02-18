@@ -41,7 +41,7 @@ from EnvWrapper import EnvWrapper
 
 class Environment:
     def __init__(self):
-        self.env_wrapper = EnvWrapper(Config.ENV_ID, Config.CLIENT_ID, Config.REMOTES, display=Config.PLAY_MODE)
+        self.env_wrapper = EnvWrapper(Config.ENV_ID, Config.CLIENT_ID, Config.REMOTES, render=Config.RENDER)
         self.nb_frames = Config.STACKED_FRAMES
         self.frame_q = Queue(maxsize=self.nb_frames)
         self.previous_state = None
